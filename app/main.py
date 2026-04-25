@@ -26,8 +26,8 @@ async def lifespan(app: FastAPI):
     #     run_seed()
     #     log.info("db.empty.autoseed.complete")
 
-    # yield
-    # log.info("scamshield.shutdown")
+    yield
+    log.info("scamshield.shutdown")
 
 
 app = FastAPI(
