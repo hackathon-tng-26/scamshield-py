@@ -39,6 +39,14 @@ class Settings(BaseSettings):
     ai_scoring_timeout_seconds: float = 0.30
     model_blend_weight: float = 0.55
 
+    # AWS ML settings (Layer 3)
+    aws_region: str = "ap-southeast-1"
+    sagemaker_mule_endpoint: str = ""  # e.g. "scamshield-mule-graphsage-v1"
+    fraud_detector_id: str = ""  # e.g. "scamshield_mule_detector"
+    fraud_detector_event_type: str = "account_registration_event"
+    l3_graph_refresh_interval_minutes: int = 15
+    l3_fallback_to_networkx: bool = True
+
 
 def get_settings() -> Settings:
     return Settings()

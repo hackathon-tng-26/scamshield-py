@@ -21,7 +21,9 @@ class ScoreTransferRequest(BaseModel):
     sender_id: str
     recipient_id: str
     recipient_phone: str
+    recipient_display_name: str = ""
     amount: float = Field(ge=0.0)
+    note: str = ""
     device_fingerprint: str
     timestamp_ms: int
     otp_issued_within_5min: bool = False

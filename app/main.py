@@ -8,6 +8,7 @@ from app.api import alerts, graph, health, scenarios, transfer
 from app.core.scoring import endpoints as scoring_endpoints
 from app.config import settings
 from app.core.identity import endpoints as identity_endpoints
+from app.core.mule_network import endpoints as mule_network_endpoints
 from app.db import init_db, is_empty
 from app.logger import get_logger
 
@@ -51,3 +52,4 @@ app.include_router(alerts.router, prefix="/alerts", tags=["alerts"])
 app.include_router(graph.router, prefix="/graph", tags=["graph"])
 app.include_router(scenarios.router, prefix="/scenarios", tags=["scenarios"])
 app.include_router(scoring_endpoints.router)
+app.include_router(mule_network_endpoints.router)
