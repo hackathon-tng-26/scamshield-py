@@ -1,33 +1,37 @@
-# Stage 1: Build dependencies using a SAM-like build image (includes gcc/development tools)
-FROM public.ecr.aws/sam/build-python3.11 AS builder
+# Stage 1: Build dependencies
+FROM python:3.11-slim AS builder
 
 WORKDIR /build
 
-# Copy project files
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends gcc python3-dev && rm -rf /var/lib/apt/lists/*
+
 COPY pyproject.toml .
 COPY README.md .
 
-# Install dependencies into a specific directory
-# We use --no-cache-dir to keep the layer small
 RUN pip install --upgrade pip && \
   pip install ".[ml]" --target /build/package --no-cache-dir --only-binary=numpy,scikit-learn,pandas,shap,psycopg2-binary,scipy
 
-# Stage 2: Final Runtime Image (Minimal AWS Lambda image)
-FROM public.ecr.aws/lambda/python:3.11
+# Stage 2: Final Runtime Image
+FROM python:3.11-slim
 
-WORKDIR ${LAMBDA_TASK_ROOT}
+WORKDIR /app
 
-# Copy installed packages from builder
-COPY --from=builder /build/package ${LAMBDA_TASK_ROOT}
+# Copy installed packages
+COPY --from=builder /build/package /usr/local/lib/python3.11/site-packages/
+# Also copy binaries like uvicorn
+COPY --from=builder /build/package/bin/ /usr/local/bin/
 
 # Copy application code
-COPY app/ ${LAMBDA_TASK_ROOT}/app/
-COPY data/ ${LAMBDA_TASK_ROOT}/data/
+COPY app/ ./app/
+COPY data/ ./data/
+COPY scripts/ ./scripts/
 
 # Set environment variables
-ENV PYTHONPATH=${LAMBDA_TASK_ROOT}
+ENV PYTHONPATH=/app
 ENV APP_ENV=production
 ENV LOG_LEVEL=INFO
 
-# Command to run the Lambda handler
-CMD [ "app.main.handler" ]
+EXPOSE 8080
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]

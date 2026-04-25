@@ -60,7 +60,3 @@ if os.environ.get("ALLOW_ADMIN_SEED", "false").lower() == "true":
     from app.api import admin
 
     app.include_router(admin.router)
-
-# AWS Lambda Handler
-from mangum import Mangum
-handler = Mangum(app, lifespan="auto", api_gateway_base_path="/PROD/production")
