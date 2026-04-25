@@ -27,6 +27,9 @@ class ScoreTransferRequest(BaseModel):
     otp_issued_within_5min: bool = False
     password_changed_within_24h: bool = False
     accessibility_service_detected: bool = False
+    card_bound_recently: bool = False
+    wallet_rebound_recently: bool = False
+    third_party_tokenisation: str | None = None
 
 
 class ScoreTransferResponse(BaseModel):

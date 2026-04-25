@@ -18,6 +18,7 @@ dependencies = [
     "structlog>=24.0",
     "scikit-learn>=1.5",
     "psycopg2-binary>=2.9",
+    "anthropic>=0.97.0",
 ]
 
 [project.optional-dependencies]

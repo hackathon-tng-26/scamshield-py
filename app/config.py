@@ -34,6 +34,11 @@ class Settings(BaseSettings):
 
     api_latency_target_ms: int = 400
 
+    ai_scoring_enabled: bool = True
+    ai_model: str = "claude-haiku-4-5-20251001"
+    ai_scoring_timeout_seconds: float = 0.30
+    model_blend_weight: float = 0.55
+
 
 def get_settings() -> Settings:
     return Settings()

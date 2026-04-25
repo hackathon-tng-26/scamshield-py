@@ -7,6 +7,8 @@ from app.logger import get_logger
 
 log = get_logger(__name__)
 
+_CLASS_TO_SCORE: dict[int, float] = {0: 0.0, 1: 50.0, 2: 100.0}
+
 
 @dataclass
 class ModelBundle:
@@ -38,3 +40,15 @@ def get_model() -> ModelBundle | None:
         _loaded = None
 
     return _loaded
+
+
+def score_from_model(bundle: ModelBundle, features: dict) -> int | None:
+    try:
+        vector = [[float(features.get(f, 0.0)) for f in bundle.feature_order]]
+        probs = bundle.estimator.predict_proba(vector)[0]
+        classes: list[int] = list(bundle.estimator.classes_)
+        weighted = sum(probs[i] * _CLASS_TO_SCORE.get(cls, 50.0) for i, cls in enumerate(classes))
+        return int(round(weighted))
+    except Exception as exc:
+        log.warning("scorer.model.predict_failed", error=str(exc)[:100])
+        return None
