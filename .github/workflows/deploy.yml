@@ -59,8 +59,18 @@ jobs:
     #     docker push $IMAGE_ID:latest
     #     docker push $IMAGE_ID:${{ github.sha }}
 
-    - name: Update Lambda Function Code
-      run: |
-        aws lambda update-function-code \
-          --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
-          --image-uri ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+    - name: Deploy to AWS App Runner
+      id: deploy-apprunner
+      uses: awslabs/amazon-app-runner-deploy@main
+      with:
+        service: scamshield-backend-service
+        image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+        access-role-arn: ${{ secrets.APP_RUNNER_ECR_ROLE_ARN }}
+        region: ${{ env.AWS_REGION }}
+        cpu: 1
+        memory: 2
+        port: 8080
+        wait-for-service-stability-seconds: 1200
+
+    - name: App Runner URL output
+      run: echo "App Runner URL is ${{ steps.deploy-apprunner.outputs.service-url }}"
