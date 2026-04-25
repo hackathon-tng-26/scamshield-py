@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import json
-import os
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
 from dataclasses import dataclass, field
 
 import anthropic
 
+from app.config import settings
 from app.logger import get_logger
 from app.core.scoring.weights import Feature
 
@@ -405,17 +405,14 @@ class AiAssessment:
 # Client lifecycle
 # ---------------------------------------------------------------------------
 
-_client: anthropic.Anthropic | None = None
+_client: anthropic.AnthropicBedrock | None = None
 
 
-def _get_client() -> anthropic.Anthropic | None:
+def _get_client() -> anthropic.AnthropicBedrock:
     global _client
     if _client is not None:
         return _client
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-    if not api_key:
-        return None
-    _client = anthropic.Anthropic(api_key=api_key)
+    _client = anthropic.AnthropicBedrock(aws_region=settings.aws_region)
     return _client
 
 
@@ -508,7 +505,7 @@ def _build_payload(features: dict, rule_score: int, rule_verdict: str) -> str:
 # API call (runs in thread for timeout control)
 # ---------------------------------------------------------------------------
 
-def _call_api(client: anthropic.Anthropic, model: str, payload: str) -> AiAssessment | None:
+def _call_api(client: anthropic.AnthropicBedrock, model: str, payload: str) -> AiAssessment | None:
     response = client.messages.create(
         model=model,
         max_tokens=1024,
@@ -560,12 +557,10 @@ def run_ai_assessment(
     features: dict,
     rule_score: int,
     rule_verdict: str,
-    model: str = "claude-haiku-4-5-20251001",
+    model: str = "anthropic.claude-haiku-4-5-20251001-v1:0",
     timeout_seconds: float = 3.0,
 ) -> AiAssessment | None:
     client = _get_client()
-    if client is None:
-        return None
 
     if not _should_invoke_ai(features, rule_score):
         log.debug("ai_engine.skipped", rule_score=rule_score, reason="below_threshold")

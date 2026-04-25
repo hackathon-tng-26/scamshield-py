@@ -41,7 +41,7 @@ def score_transfer(req: ScoreTransferRequest, db: Session) -> ScoreTransferRespo
             features,
             rule_score=score,
             rule_verdict=verdict,
-            model=settings.ai_model,
+            model=settings.bedrock_model_id,
             timeout_seconds=settings.ai_scoring_timeout_seconds,
         )
         if ai is not None and ai.confidence >= 0.4:

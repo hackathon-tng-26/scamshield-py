@@ -19,6 +19,7 @@ dependencies = [
     "scikit-learn>=1.5,<1.6",
     "mangum>=0.17",
     "psycopg2-binary>=2.9",
+    "anthropic[bedrock]>=0.97.0",
 ]
 
 [project.optional-dependencies]
