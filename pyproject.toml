@@ -17,6 +17,8 @@ dependencies = [
     "python-dotenv>=1.0",
     "structlog>=24.0",
     "scikit-learn>=1.5",
+    "mangum>=0.17",
+    "psycopg2-binary>=2.9",
 ]
 
 [project.optional-dependencies]

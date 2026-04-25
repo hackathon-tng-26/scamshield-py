@@ -47,3 +47,7 @@ app.include_router(transfer.router, prefix="/transfer", tags=["transfer"])
 app.include_router(alerts.router, prefix="/alerts", tags=["alerts"])
 app.include_router(graph.router, prefix="/graph", tags=["graph"])
 app.include_router(scenarios.router, prefix="/scenarios", tags=["scenarios"])
+
+# AWS Lambda Handler
+from mangum import Mangum
+handler = Mangum(app, lifespan="auto")
