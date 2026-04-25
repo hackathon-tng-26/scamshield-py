@@ -24,6 +24,9 @@ class ScoreTransferRequest(BaseModel):
     amount: float = Field(ge=0.0)
     device_fingerprint: str
     timestamp_ms: int
+    otp_issued_within_5min: bool = False
+    password_changed_within_24h: bool = False
+    accessibility_service_detected: bool = False
 
 
 class ScoreTransferResponse(BaseModel):

@@ -4,57 +4,95 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict
 
 
-OtpAction = Literal["login", "transfer", "rebind"]
-OtpResolved = Literal["allowed", "blocked"]
-CooldownReason = Literal["new_device", "suspicious_session"]
-RebindOutcome = Literal["pending", "approved", "blocked"]
-RebindFriction = Literal["video_verify", "support_call"]
-
-
-class OtpEventOut(BaseModel):
+class OtpIssueRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    id: str
     user_id: str
-    device_id: str | None
-    action: OtpAction
-    geo_ip_region: str | None
-    device_label: str | None
-    issued_at: datetime
-    resolved: OtpResolved | None
+    action: Literal["login", "transfer", "rebind"]
+    device_fingerprint: str
+    geo_ip_region: str = "Kuala Lumpur"
+    device_label: str = ""
 
 
-class DeviceSessionOut(BaseModel):
+class OtpIssueResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    id: str
-    user_id: str
-    device_id: str | None
-    started_at: datetime
-    last_active_at: datetime
-    otp_issued_at: datetime | None
-    password_changed_at: datetime | None
-    accessibility_service_detected: bool
-    is_active: bool
+    otp_id: str
+    otp_code: str
+    sms_copy: str
+    expires_at: datetime
 
 
-class DeviceCooldownOut(BaseModel):
+class OtpVerifyRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    id: str
-    user_id: str
-    device_id: str | None
-    cooldown_until: datetime
-    reason: CooldownReason
-    created_at: datetime
+    otp_id: str
+    otp_code: str
 
 
-class RebindAttemptOut(BaseModel):
+class OtpVerifyResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    id: str
+    success: bool
+    otp_id: str
+    message: str
+
+
+class OtpResolveRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    otp_id: str
+    resolution: Literal["allowed", "blocked"]
+
+
+class OtpResolveResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    success: bool
+    otp_id: str
+    resolution: str
+
+
+class DeviceEnrollRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     user_id: str
-    device_id: str | None
-    attempted_at: datetime
-    outcome: RebindOutcome | None
-    friction_method: RebindFriction | None
+    device_fingerprint: str
+    geo_ip_region: str = "Kuala Lumpur"
+    device_label: str = ""
+
+
+class DeviceTrustResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    device_id: str
+    trusted: bool
+    cooldown_active: bool
+    cooldown_until: datetime | None
+    cooldown_hours_remaining: float | None
+
+
+class RebindRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    user_id: str
+    new_device_fingerprint: str
+
+
+class RebindResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    rebind_id: str
+    status: Literal["approved", "pending", "blocked"]
+    friction_required: bool
+    friction_method: Literal["video_verify", "support_call"] | None
+
+
+class CooldownStatusResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    user_id: str
+    cooldown_active: bool
+    cooldown_until: datetime | None
+    reason: str | None
+    banner_message: str | None

@@ -4,7 +4,7 @@ from statistics import mean, stdev
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.models import Transaction, User
+from app.models import Device, OtpEvent, RebindAttempt, Transaction, User
 from app.schemas.transfer import ScoreTransferRequest
 
 
@@ -19,6 +19,8 @@ def extract_features(req: ScoreTransferRequest, db: Session) -> dict:
         .filter(Transaction.sender_id == sender.id, Transaction.recipient_id == recipient.id)
         .count()
     )
+
+    l1_signals = _extract_l1_signals(req, db)
 
     cutoff_2h = datetime.utcnow() - timedelta(hours=2)
     velocity_count = (
@@ -50,6 +52,56 @@ def extract_features(req: ScoreTransferRequest, db: Session) -> dict:
         "recipient_account_age_days": _account_age_days(recipient),
         "time_of_day_in_pattern": True,
         "user_risk_history": "clean",
+        **l1_signals,
+    }
+
+
+def _extract_l1_signals(req: ScoreTransferRequest, db: Session) -> dict:
+    device = (
+        db.query(Device)
+        .filter(Device.user_id == req.sender_id, Device.fingerprint == req.device_fingerprint)
+        .first()
+    )
+
+    device_trusted = False
+    new_device_login = False
+    device_in_cooldown = False
+    if device:
+        device_trusted = device.trusted
+        cutoff_1h = datetime.utcnow() - timedelta(hours=1)
+        new_device_login = device.first_seen > cutoff_1h
+        from app.core.identity.service import is_device_in_cooldown
+
+        device_in_cooldown, _ = is_device_in_cooldown(db, req.sender_id, req.device_fingerprint)
+
+    latest_otp = (
+        db.query(OtpEvent)
+        .filter(OtpEvent.user_id == req.sender_id)
+        .order_by(OtpEvent.issued_at.desc())
+        .first()
+    )
+    otp_context_ignored = latest_otp.resolved == "blocked" if latest_otp else False
+
+    recent_rebind = (
+        db.query(RebindAttempt)
+        .filter(
+            RebindAttempt.user_id == req.sender_id,
+            RebindAttempt.attempted_at >= datetime.utcnow() - timedelta(hours=1),
+            RebindAttempt.outcome == "pending",
+        )
+        .first()
+    )
+    rebind_in_progress = recent_rebind is not None
+
+    return {
+        "device_trusted": device_trusted,
+        "new_device_login": new_device_login,
+        "device_in_cooldown": device_in_cooldown,
+        "otp_context_ignored": otp_context_ignored,
+        "rebind_in_progress": rebind_in_progress,
+        "otp_issued_within_5min": req.otp_issued_within_5min,
+        "password_changed_within_24h": req.password_changed_within_24h,
+        "accessibility_service_detected": req.accessibility_service_detected,
     }
 
 

@@ -8,7 +8,17 @@ from faker import Faker
 
 from app.db import SessionLocal, init_db
 from app.logger import get_logger
-from app.models import Device, DemoScenario, ScamReport, SmsLure, Transaction, User
+from app.models import (
+    Device,
+    DemoScenario,
+    DeviceCooldown,
+    OtpEvent,
+    RebindAttempt,
+    ScamReport,
+    SmsLure,
+    Transaction,
+    User,
+)
 
 fake = Faker("id_ID")
 Faker.seed(42)
@@ -99,6 +109,12 @@ def seed() -> None:
 
         log.info("seed.sms_lures.begin")
         seed_sms_lures(s)
+
+        log.info("seed.l1_devices.begin")
+        seed_l1_devices(s)
+
+        log.info("seed.l1_otp_sessions.begin")
+        seed_l1_otp_and_sessions(s)
 
         s.commit()
         log.info(
@@ -323,6 +339,99 @@ def seed_sms_lures(s) -> None:
     ]
     for template, category, lang in lures:
         s.add(SmsLure(template=template, category=category, language=lang))
+
+
+def seed_l1_devices(s) -> None:
+    now = datetime.utcnow()
+
+    # Trusted device for demo_user_01 (victim on their own phone)
+    trusted_dev = Device(
+        id="dev-trusted-s21",
+        user_id="demo_user_01",
+        fingerprint="trusted-samsung-s21",
+        first_seen=now - timedelta(days=180),
+        geo_ip_region="Kuala Lumpur",
+        trusted=True,
+    )
+    s.add(trusted_dev)
+
+    # Update user's trusted_device_id
+    user = s.query(User).filter(User.id == "demo_user_01").first()
+    if user:
+        user.trusted_device_id = trusted_dev.id
+
+    # New untrusted device for scammer (simulates scammer's phone)
+    scammer_dev = Device(
+        id="dev-scammer-s24",
+        user_id="scammer_device_02",
+        fingerprint="scammer-samsung-s24",
+        first_seen=now,
+        geo_ip_region="Johor Bahru",
+        trusted=False,
+    )
+    s.add(scammer_dev)
+
+    # Explicit cooldown for scammer device
+    s.add(
+        DeviceCooldown(
+            id="cd-scammer-s24",
+            user_id="scammer_device_02",
+            device_id=scammer_dev.id,
+            cooldown_until=now + timedelta(hours=24),
+            reason="new_device",
+            created_at=now,
+        )
+    )
+
+
+def seed_l1_otp_and_sessions(s) -> None:
+    now = datetime.utcnow()
+
+    # OTP for scammer device that was NOT stopped (simulates victim forwarding OTP to fake page)
+    s.add(
+        OtpEvent(
+            id="otp-scammer-login",
+            user_id="scammer_device_02",
+            device_id="dev-scammer-s24",
+            action="login",
+            geo_ip_region="Johor Bahru",
+            device_label="Samsung S24",
+            otp_code="654321",
+            issued_at=now - timedelta(minutes=10),
+            expires_at=now - timedelta(minutes=5),
+            used_at=now - timedelta(minutes=8),
+            resolved="allowed",
+        )
+    )
+
+    # OTP that WAS stopped (for L1-STOP demo scenario)
+    s.add(
+        OtpEvent(
+            id="otp-stopped-demo",
+            user_id="demo_user_01",
+            device_id="dev-trusted-s21",
+            action="login",
+            geo_ip_region="Kuala Lumpur",
+            device_label="Samsung S21",
+            otp_code="111111",
+            issued_at=now - timedelta(minutes=30),
+            expires_at=now - timedelta(minutes=25),
+            used_at=None,
+            resolved="blocked",
+        )
+    )
+
+    # Pending rebind attempt for scammer
+    s.add(
+        RebindAttempt(
+            id="rb-scammer-01",
+            user_id="scammer_device_02",
+            device_id="dev-scammer-s24",
+            attempted_at=now - timedelta(minutes=5),
+            outcome="pending",
+            friction_method="video_verify",
+        )
+    )
 
 
 if __name__ == "__main__":

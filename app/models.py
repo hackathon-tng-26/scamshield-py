@@ -107,7 +107,10 @@ class OtpEvent(Base):
     action: Mapped[str] = mapped_column(String(64))
     geo_ip_region: Mapped[str | None] = mapped_column(String(64), nullable=True)
     device_label: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    otp_code: Mapped[str] = mapped_column(String(16))
     issued_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow, index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     resolved: Mapped[str | None] = mapped_column(String(16), nullable=True)
 
     user: Mapped["User"] = relationship(foreign_keys=[user_id])

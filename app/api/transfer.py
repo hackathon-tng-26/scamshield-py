@@ -1,9 +1,10 @@
 import json
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.core.identity.service import is_device_in_cooldown
 from app.db import get_db
 from app.models import Transaction
 from app.schemas.transfer import (
@@ -23,6 +24,17 @@ def score(req: ScoreTransferRequest, db: Session = Depends(get_db)) -> ScoreTran
 
 @router.post("/execute", response_model=ExecuteTransferResponse)
 def execute(req: ScoreTransferRequest, db: Session = Depends(get_db)) -> ExecuteTransferResponse:
+    in_cooldown, until = is_device_in_cooldown(db, req.sender_id, req.device_fingerprint)
+    if in_cooldown:
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "error": "DEVICE_COOLDOWN",
+                "cooldown_until": until.isoformat() if until else None,
+                "message": "This device is in security cooldown. Transfers are blocked.",
+            },
+        )
+
     scored = score_transfer(req, db)
     txn = Transaction(
         id=scored.transaction_id or str(uuid4()),

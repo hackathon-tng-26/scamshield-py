@@ -66,6 +66,47 @@ def apply_rules(features: dict) -> tuple[int, list[FeatureContribution], list[st
     if prior >= 3:
         highlights.append(f"{prior} previous transfers to this person")
 
+    # L1 Session signals (25% quadrant)
+    if features.get("device_in_cooldown"):
+        delta = 20
+        score += delta
+        contribs.append(FeatureContribution(feature="device in cooldown (L1)", contribution=delta, direction="positive"))
+        highlights.append("Device is in new-device cooldown")
+
+    if features.get("rebind_in_progress") and features.get("new_device_login") and features.get("new_recipient"):
+        score = max(score, 85)
+        contribs.append(
+            FeatureContribution(feature="rebind + new device + new recipient (L1)", contribution=0, direction="positive")
+        )
+        highlights.append("Rebind in progress from new device to new recipient")
+
+    if not features.get("device_trusted", True):
+        delta = 10
+        score += delta
+        contribs.append(FeatureContribution(feature="untrusted device (L1)", contribution=delta, direction="positive"))
+
+    if features.get("otp_context_ignored"):
+        delta = 15
+        score += delta
+        contribs.append(FeatureContribution(feature="OTP STOP reply detected (L1)", contribution=delta, direction="positive"))
+        highlights.append("Previous OTP was blocked by user")
+
+    if features.get("otp_issued_within_5min"):
+        delta = 5
+        score += delta
+        contribs.append(FeatureContribution(feature="OTP issued < 5 min ago", contribution=delta, direction="positive"))
+
+    if features.get("password_changed_within_24h"):
+        delta = 8
+        score += delta
+        contribs.append(FeatureContribution(feature="password changed < 24h ago", contribution=delta, direction="positive"))
+
+    if features.get("accessibility_service_detected"):
+        delta = 12
+        score += delta
+        contribs.append(FeatureContribution(feature="accessibility service detected", contribution=delta, direction="positive"))
+        highlights.append("Accessibility service active — possible remote takeover")
+
     final = max(0, min(100, int(round(score))))
     return final, contribs, highlights
 
