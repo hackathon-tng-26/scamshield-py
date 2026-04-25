@@ -18,7 +18,8 @@ log = get_logger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     log.info("scamshield.startup", env=settings.app_env, version=__version__)
-    init_db(drop_first=False)
+    # run manually
+    # init_db(drop_first=False)
 
     # if settings.auto_seed_on_empty and is_empty():
     #     log.info("db.empty.autoseed.begin")
@@ -46,6 +47,11 @@ app.add_middleware(
 )
 
 app.include_router(health.router)
+
+@app.get("/")
+async def root():
+    return {"message": "ScamShield API is running. Visit /docs for documentation."}
+
 app.include_router(identity_endpoints.router)
 app.include_router(transfer.router, prefix="/transfer", tags=["transfer"])
 app.include_router(alerts.router, prefix="/alerts", tags=["alerts"])

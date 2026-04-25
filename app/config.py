@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     app_env: str = "development"
     log_level: str = "INFO"
 
-    database_url: str = "postgresql://postgres:password@localhost:5432/scamshield"
+    database_url: str = "postgresql://postgres:7JrVEaeqz9FuNc4h71oV@scamshield-db-dev-1.cdyeygg6yf9d.ap-southeast-1.rds.amazonaws.com:5432/postgres"
 
     @property
     def resolved_database_url(self) -> str:
