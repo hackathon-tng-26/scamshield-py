@@ -61,7 +61,7 @@ jobs:
 
     - name: Deploy to AWS App Runner
       id: deploy-apprunner
-      uses: aws-actions/amazon-apprunner-deploy@v2
+      uses: awslabs/amazon-app-runner-deploy@main
       with:
         service: scamshield-backend-service
         image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
