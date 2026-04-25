@@ -12,13 +12,13 @@ dependencies = [
     "pydantic-settings>=2.6",
     "sqlalchemy>=2.0",
     "networkx>=3.4",
-    "numpy>=2.0",
+    "numpy>=2.0,<2.2",
     "faker>=30",
     "python-dotenv>=1.0",
     "structlog>=24.0",
-    "scikit-learn>=1.5",
+    "scikit-learn>=1.5,<1.6",
+    "mangum>=0.17",
     "psycopg2-binary>=2.9",
-    "anthropic>=0.97.0",
 ]
 
 [project.optional-dependencies]

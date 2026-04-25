@@ -51,5 +51,9 @@ app.include_router(transfer.router, prefix="/transfer", tags=["transfer"])
 app.include_router(alerts.router, prefix="/alerts", tags=["alerts"])
 app.include_router(graph.router, prefix="/graph", tags=["graph"])
 app.include_router(scenarios.router, prefix="/scenarios", tags=["scenarios"])
-app.include_router(scoring_endpoints.router)
-app.include_router(mule_network_endpoints.router)
+# app.include_router(scoring_endpoints.router)
+# app.include_router(mule_network_endpoints.router)
+
+# AWS Lambda Handler
+from mangum import Mangum
+handler = Mangum(app, lifespan="auto", api_gateway_base_path="/production")

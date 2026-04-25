@@ -12,6 +12,15 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql://postgres:password@localhost:5432/scamshield"
 
+    @property
+    def resolved_database_url(self) -> str:
+        import os
+        # AWS Lambda provides LAMBDA_TASK_ROOT. If present, we are in Lambda.
+        if os.environ.get("LAMBDA_TASK_ROOT"):
+            # Move SQLite to /tmp for write access
+            return "sqlite:////tmp/scamshield.sqlite"
+        return self.database_url
+
     cors_origins: Annotated[list[str], NoDecode] = Field(
         default_factory=lambda: [
             "http://localhost:5173",
