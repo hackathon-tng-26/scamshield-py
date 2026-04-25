@@ -63,4 +63,4 @@ if os.environ.get("ALLOW_ADMIN_SEED", "false").lower() == "true":
 
 # AWS Lambda Handler
 from mangum import Mangum
-handler = Mangum(app, lifespan="auto", api_gateway_base_path="/production")
+handler = Mangum(app, lifespan="auto", api_gateway_base_path="/PROD/production")
