@@ -1,5 +1,8 @@
 # ScamShield Backend
 
+**Live Production API:** [https://cpeudu2ddb.ap-southeast-1.awsapprunner.com/](https://cpeudu2ddb.ap-southeast-1.awsapprunner.com/)
+*(Interactive Docs: [Swagger UI](https://cpeudu2ddb.ap-southeast-1.awsapprunner.com/docs))*
+
 FastAPI + scikit-learn + NetworkX backend for the ScamShield mobile demo.
 
 ## Stack
