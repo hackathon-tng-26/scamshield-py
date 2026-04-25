@@ -54,6 +54,13 @@ app.include_router(scenarios.router, prefix="/scenarios", tags=["scenarios"])
 # app.include_router(scoring_endpoints.router)
 # app.include_router(mule_network_endpoints.router)
 
+# Admin endpoints (gated by ALLOW_ADMIN_SEED env var — off by default)
+import os
+if os.environ.get("ALLOW_ADMIN_SEED", "false").lower() == "true":
+    from app.api import admin
+
+    app.include_router(admin.router)
+
 # AWS Lambda Handler
 from mangum import Mangum
 handler = Mangum(app, lifespan="auto", api_gateway_base_path="/production")

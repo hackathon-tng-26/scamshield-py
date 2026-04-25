@@ -49,6 +49,26 @@ def test_random_low_amount_friend_is_green():
     assert res.verdict in ("GREEN", "YELLOW")
 
 
+def test_y1_yellow_via_override():
+    with SessionLocal() as db:
+        res = score_transfer(
+            _req("demo_user_01", "new_recipient_22", "+60 13-777 0022", 800.0), db
+        )
+    assert res.verdict == "YELLOW"
+    assert 45 <= res.score <= 65
+
+
+def test_l1_device_cooldown_blocks_execute():
+    from app.core.identity.service import is_device_in_cooldown
+
+    with SessionLocal() as db:
+        in_cooldown, until = is_device_in_cooldown(
+            db, "scammer_device_02", "scammer-samsung-s24"
+        )
+    assert in_cooldown is True
+    assert until is not None
+
+
 def test_attribution_shape():
     with SessionLocal() as db:
         res = score_transfer(_req("demo_user_01", "recipient_mule_01", "+60 11-XXXX 8712", 2000.0), db)
