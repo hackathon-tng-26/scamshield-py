@@ -20,14 +20,14 @@ async def lifespan(app: FastAPI):
     log.info("scamshield.startup", env=settings.app_env, version=__version__)
     init_db(drop_first=False)
 
-    if settings.auto_seed_on_empty and is_empty():
-        log.info("db.empty.autoseed.begin")
-        from scripts.seed import seed as run_seed
-        run_seed()
-        log.info("db.empty.autoseed.complete")
+    # if settings.auto_seed_on_empty and is_empty():
+    #     log.info("db.empty.autoseed.begin")
+    #     from scripts.seed import seed as run_seed
+    #     run_seed()
+    #     log.info("db.empty.autoseed.complete")
 
-    yield
-    log.info("scamshield.shutdown")
+    # yield
+    # log.info("scamshield.shutdown")
 
 
 app = FastAPI(
