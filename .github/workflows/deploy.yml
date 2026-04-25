@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  AWS_REGION: us-east-1           # Change to your region
+  AWS_REGION: ap-southeast-1          # Change to your region
   ECR_REPOSITORY: scamshield-api  # Your ECR repo name
   LAMBDA_FUNCTION_NAME: scamshield-backend
 
