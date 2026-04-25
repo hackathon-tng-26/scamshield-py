@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     app_env: str = "development"
     log_level: str = "INFO"
 
-    database_url: str = "sqlite:///./data/scamshield.sqlite"
+    database_url: str = "postgresql://postgres:password@localhost:5432/scamshield"
 
     cors_origins: Annotated[list[str], NoDecode] = Field(
         default_factory=lambda: [
