@@ -1,5 +1,5 @@
 from app.schemas.transfer import FeatureContribution, Verdict
-from app.scoring.weights import (
+from app.core.scoring.weights import (
     DEFAULT_WEIGHTS,
     Feature,
     GroupAWeights,

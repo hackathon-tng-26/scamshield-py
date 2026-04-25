@@ -6,11 +6,11 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.logger import get_logger
 from app.schemas.transfer import FeatureContribution, ScoreTransferRequest, ScoreTransferResponse
-from app.scoring.ai_engine import AiAssessment, run_ai_assessment
-from app.scoring.demo_overrides import check_demo_override
-from app.scoring.features import extract_features
-from app.scoring.model import get_model, score_from_model
-from app.scoring.rules import apply_rules, verdict_from_score
+from app.core.ai_engine.engine import AiAssessment, run_ai_assessment
+from app.core.scoring.demo_overrides import check_demo_override
+from app.core.scoring.features import extract_features
+from app.core.scoring.model import get_model, score_from_model
+from app.core.scoring.rules import apply_rules, verdict_from_score
 
 log = get_logger(__name__)
 

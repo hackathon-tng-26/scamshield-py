@@ -12,7 +12,7 @@ from app.schemas.transfer import (
     ScoreTransferRequest,
     ScoreTransferResponse,
 )
-from app.scoring.service import score_transfer
+from app.core.scoring.service import score_transfer
 
 router = APIRouter()
 

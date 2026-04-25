@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 
 from app.schemas.transfer import FeatureContribution
-from app.scoring.rules import (
+from app.core.scoring.rules import (
     _apply_hard_fail_rules,
     _score_group_a,
     _score_group_b,
@@ -12,7 +12,7 @@ from app.scoring.rules import (
     apply_rules,
     verdict_from_score,
 )
-from app.scoring.weights import (
+from app.core.scoring.weights import (
     DEFAULT_WEIGHTS,
     GROUP_MAX,
     Feature,

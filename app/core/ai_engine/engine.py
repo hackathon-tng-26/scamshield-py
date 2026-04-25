@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 import anthropic
 
 from app.logger import get_logger
-from app.scoring.weights import Feature
+from app.core.scoring.weights import Feature
 
 log = get_logger(__name__)
 

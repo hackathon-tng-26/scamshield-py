@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from app.db import SessionLocal
 from app.logger import get_logger
 from app.models import ScamReport, Transaction, User
-from app.scoring.rules import apply_rules, verdict_from_score
+from app.core.scoring.rules import apply_rules, verdict_from_score
 
 log = get_logger("train")
 
@@ -60,7 +60,7 @@ def main() -> None:
     model.fit(x, y)
     log.info("train.fit.done", classes=list(model.classes_))
 
-    from app.scoring.model import ModelBundle
+    from app.core.scoring.model import ModelBundle
 
     bundle = ModelBundle(estimator=model, feature_order=FEATURE_ORDER)
     out_path = "./data/scorer.pkl"

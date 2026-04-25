@@ -4,7 +4,7 @@ import pytest
 
 from app.db import SessionLocal, init_db, is_empty
 from app.schemas.transfer import ScoreTransferRequest
-from app.scoring.service import score_transfer
+from app.core.scoring.service import score_transfer
 
 
 @pytest.fixture(scope="module", autouse=True)
