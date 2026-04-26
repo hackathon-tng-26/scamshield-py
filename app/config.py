@@ -59,9 +59,9 @@ class Settings(BaseSettings):
     # Alibaba Cloud OSS settings
     oss_access_key_id: str = "STS.NYxdEyR2HneFNMUhLiqXjhA8z"
     oss_access_key_secret: str = "DJKUmN9DUT9nWCUrAZTNEENC2LhbR7nSTGFG5WBjMWo6"
-    oss_security_token: str = ""
+    oss_security_token: str = "CAIS1gJ1q6Ft5B2yfSjIr5rNL//Nv+1p2aetTGvkjEw8fddGh4STmDz2IHhNfXhuB+wWtv4+nGlR7fgZlqR9SplFTEfHcNB99MgIqZR+oCR14J7b16cNrbH4M0rxYkeJ8a2/SuH9S8ynCZXJQlvYlyh17KLnfDG5JTKMOoGIjpgVBbZ+HHPPD1x8CcxROxFppeIDKHLVLozNCBPxhXfKB0ca0WgVy0EHtPzikpXDtECA0QOrmrFK/r6ceMb0P5leW75kSMqw0eBMca7M7TVd8RAi9t0t1PUdqGmZ4oHFWQgJukzdbbHOhvRrLR5kYJI3AKNesvXwrsZf/8DeiYnzzA5AJ/pF1OZ2lFpBVqsuccDe1bZRHd6TUxylWUCYoB0T4K0OdZN25q7btpdQ657dRM7CcDuuzoXNNj4EHGktRYaLHq/Ir5T7ITeM356+Q3LrJRHxkDbKKcBUBysagAGDQH6pBGpXxSvV/p+/GHze19dFOw9IBYv9KalkZYqztSRWoYq2aJc7xjti/wfTku9dK6WhfyJTkwcXi2CVWTm/GLvDz0etq2zXR/wMudrm5dgoUdL+bgm8CcW0CNaKEqrsn+/wzuzL3uaB9MIcP6LfswOcanm0QWohF8hN2JjuriAA"
     oss_endpoint: str = "logging-scamshield.oss-ap-southeast-1.aliyuncs.com"
-    oss_bucket_name: str = "scamshield-audit-logs"
+    oss_bucket_name: str = "logging-scamshield"
 
 def get_settings() -> Settings:
     return Settings()

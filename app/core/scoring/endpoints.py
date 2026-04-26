@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.core.identity.service import is_device_in_cooldown
 from app.core.scoring.service import score_transfer
+from app.core.scoring.features import _get_or_synthesise_user
 from app.core.oss import upload_transaction_log
 from app.db import get_db
 from app.models import Transaction
@@ -47,6 +48,14 @@ def execute(
         )
 
     scored = score_transfer(req, db)
+
+    # Ensure sender and recipient exist in DB to prevent foreign key violations, 
+    # especially when demo overrides bypass standard feature extraction
+    sender = _get_or_synthesise_user(db, req.sender_id, phone=None, default_mule_likelihood=0.05)
+    recipient = _get_or_synthesise_user(db, req.recipient_id, phone=req.recipient_phone, default_mule_likelihood=0.10)
+    db.add(sender)
+    db.add(recipient)
+
     txn = Transaction(
         id=scored.transaction_id or str(uuid4()),
         sender_id=req.sender_id,
