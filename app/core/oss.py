@@ -20,7 +20,11 @@ def upload_transaction_log(transaction_data: dict) -> None:
         return
 
     try:
-        auth = oss2.Auth(settings.oss_access_key_id, settings.oss_access_key_secret)
+        if settings.oss_access_key_id.startswith("STS."):
+            auth = oss2.StsAuth(settings.oss_access_key_id, settings.oss_access_key_secret, settings.oss_security_token)
+        else:
+            auth = oss2.Auth(settings.oss_access_key_id, settings.oss_access_key_secret)
+            
         bucket = oss2.Bucket(auth, settings.oss_endpoint, settings.oss_bucket_name)
 
         # Generate a unique key based on timestamp and transaction ID

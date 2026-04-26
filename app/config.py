@@ -59,6 +59,7 @@ class Settings(BaseSettings):
     # Alibaba Cloud OSS settings
     oss_access_key_id: str = "STS.NYxdEyR2HneFNMUhLiqXjhA8z"
     oss_access_key_secret: str = "DJKUmN9DUT9nWCUrAZTNEENC2LhbR7nSTGFG5WBjMWo6"
+    oss_security_token: str = ""
     oss_endpoint: str = "logging-scamshield.oss-ap-southeast-1.aliyuncs.com"
     oss_bucket_name: str = "scamshield-audit-logs"
 
