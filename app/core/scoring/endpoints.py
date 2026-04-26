@@ -2,11 +2,12 @@
 import json
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 
 from app.core.identity.service import is_device_in_cooldown
 from app.core.scoring.service import score_transfer
+from app.core.oss import upload_transaction_log
 from app.db import get_db
 from app.models import Transaction
 from app.schemas.transfer import (
@@ -28,7 +29,11 @@ def score(req: ScoreTransferRequest, db: Session = Depends(get_db)) -> ScoreTran
 
 
 @transfer_router.post("/execute", response_model=ExecuteTransferResponse)
-def execute(req: ScoreTransferRequest, db: Session = Depends(get_db)) -> ExecuteTransferResponse:
+def execute(
+    req: ScoreTransferRequest, 
+    background_tasks: BackgroundTasks, 
+    db: Session = Depends(get_db)
+) -> ExecuteTransferResponse:
     """Fired when user taps Send. Enforces L1 cooldown then persists transaction."""
     in_cooldown, until = is_device_in_cooldown(db, req.sender_id, req.device_fingerprint)
     if in_cooldown:
@@ -55,6 +60,21 @@ def execute(req: ScoreTransferRequest, db: Session = Depends(get_db)) -> Execute
     )
     db.add(txn)
     db.commit()
+
+    # Prepare data for Alibaba Cloud OSS Audit Logging
+    transaction_data = {
+        "transaction_id": txn.id,
+        "sender_id": req.sender_id,
+        "receiver_id": req.recipient_id,
+        "amount": req.amount,
+        "l2_score": scored.score,
+        "timestamp": req.timestamp_ms,
+        "risk_factors": [attr.feature for attr in scored.attribution]
+    }
+    
+    # Trigger background async upload to OSS
+    background_tasks.add_task(upload_transaction_log, transaction_data)
+
     return ExecuteTransferResponse(success=True, transaction_id=txn.id)
 
 
