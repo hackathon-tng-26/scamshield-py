@@ -55,11 +55,12 @@ def execute(
     recipient = _get_or_synthesise_user(db, req.recipient_id, phone=req.recipient_phone, default_mule_likelihood=0.10)
     db.add(sender)
     db.add(recipient)
+    db.flush()
 
     txn = Transaction(
         id=scored.transaction_id or str(uuid4()),
-        sender_id=req.sender_id,
-        recipient_id=req.recipient_id,
+        sender_id=sender.id,
+        recipient_id=recipient.id,
         amount=req.amount,
         risk_score=scored.score,
         verdict=scored.verdict,
@@ -73,8 +74,8 @@ def execute(
     # Prepare data for Alibaba Cloud OSS Audit Logging
     transaction_data = {
         "transaction_id": txn.id,
-        "sender_id": req.sender_id,
-        "receiver_id": req.recipient_id,
+        "sender_id": sender.id,
+        "receiver_id": recipient.id,
         "amount": req.amount,
         "l2_score": scored.score,
         "timestamp": req.timestamp_ms,
